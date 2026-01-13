@@ -1,0 +1,3 @@
+[submodule "pygg"]
+	path = pygg
+	url = https://github.com/xpiotreee/pygg
