@@ -22,4 +22,6 @@ class Settings:
         self.MIN_AGE = int(os.getenv('MIN_AGE', 20))
         self.MAX_AGE = int(os.getenv('MAX_AGE', 60))
 
+        self.DEBUG = os.getenv('DEBUG', 'false').lower() in ('1', 'true')
+
 settings = Settings()
