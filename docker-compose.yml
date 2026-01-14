@@ -8,3 +8,15 @@ services:
       - .env
     volumes:
       - ./sessions:/app/sessions
+    depends_on:
+      - redis
+    ports:
+      - "8080:8080"
+    environment:
+      - REDIS_HOST=redis
+
+  redis:
+    image: redis:alpine
+    restart: always
+    ports:
+      - "6379:6379"
