@@ -2,16 +2,11 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 
 class BotLoginRequest(BaseModel):
-    uin: int
     password: str
-    events: List[str] = ["message", "roulette", "system"] 
+    events: List[str] = ["message", "roulette", "system", "status", "typing"] 
     settings: Optional[Dict[str, Any]] = None 
 
-class BotActionRequest(BaseModel):
-    uin: int
-
 class MessageRequest(BaseModel):
-    uin: int
     recipient: int
     content: str
 

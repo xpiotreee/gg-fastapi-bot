@@ -57,3 +57,10 @@ class FastGG(GGClient):
                 "status": packet.status,
                 "description": packet.description
             })
+
+    async def on_typing(self, packet):
+        if "typing" in self.subscribed_events:
+             await self._emit_event("typing", {
+                "sender": packet.uin,
+                "type": packet.type # length of text typed so far
+             })

@@ -23,7 +23,7 @@ def create_app() -> FastAPI:
         if settings.DEFAULT_UIN and settings.DEFAULT_PASSWORD:
             logger.info(f"Found default bot in config (UIN: {settings.DEFAULT_UIN}), connecting...")
             try:
-                default_events = ["message", "roulette", "system"]
+                default_events = ["message", "roulette", "system", "status", "typing"]
                 await manager.start_bot(
                     settings.DEFAULT_UIN, 
                     settings.DEFAULT_PASSWORD, 
