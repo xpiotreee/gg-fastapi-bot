@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from app.models.schemas import BotLoginRequest, MessageRequest, BotStatus
+from app.models.schemas import BotLoginRequest, MessageRequest, BotStatus, UserProfile
 from app.core.bot_manager import BotManager
 from app.dependencies import get_bot_manager
 
@@ -57,3 +57,26 @@ async def get_bot_status(uin: int, manager: BotManager = Depends(get_bot_manager
         connected=bool(bot.imtoken),
         events=list(bot.subscribed_events)
     )
+
+@router.get("/{uin}/profile/{target_uin}", response_model=UserProfile)
+async def get_user_profile(uin: int, target_uin: int, manager: BotManager = Depends(get_bot_manager)):
+    bot = manager.get_bot(uin)
+    if not bot:
+        raise HTTPException(status_code=404, detail="Bot not connected")
+    
+    try:
+        user = await bot.get_user(target_uin)
+        return UserProfile(
+            uin=user.uin,
+            gender=str(user.gender) if user.gender else None,
+            label=user.label,
+            city=user.city,
+            age=str(user.age) if user.age else None,
+            description=user.description,
+            about=user.about,
+            avatar_url=user.avatar_url,
+            gallery=user.gallery if user.gallery else [],
+            status=user.status
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch profile: {str(e)}")

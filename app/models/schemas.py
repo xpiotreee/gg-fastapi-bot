@@ -15,6 +15,18 @@ class BotStatus(BaseModel):
     connected: bool
     events: List[str]
 
+class UserProfile(BaseModel):
+    uin: int
+    gender: Optional[str]
+    label: Optional[str]
+    city: Optional[str]
+    age: Optional[str]
+    description: Optional[str]
+    about: Optional[str]
+    avatar_url: Optional[str]
+    gallery: List[str] = []
+    status: Optional[int] = None
+
 class SystemStatus(BaseModel):
     active_bots_count: int
     bots: List[BotStatus]
