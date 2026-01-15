@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from app.models.schemas import BotLoginRequest, MessageRequest, BotStatus, UserProfile
+from app.models.schemas import BotLoginRequest, MessageRequest, BotStatus, UserProfile, AutoRouletteRequest
 from app.core.bot_manager import BotManager
 from app.dependencies import get_bot_manager
 
@@ -55,8 +55,24 @@ async def get_bot_status(uin: int, manager: BotManager = Depends(get_bot_manager
     return BotStatus(
         uin=uin,
         connected=bool(bot.imtoken),
-        events=list(bot.subscribed_events)
+        events=list(bot.subscribed_events),
+        auto_roulette=bot.auto_roulette_enabled,
+        auto_roulette_cooldown=bot.auto_roulette_cooldown
     )
+
+@router.post("/{uin}/auto-roulette")
+async def toggle_auto_roulette(uin: int, req: AutoRouletteRequest, manager: BotManager = Depends(get_bot_manager)):
+    bot = manager.get_bot(uin)
+    if not bot:
+        raise HTTPException(status_code=404, detail="Bot not connected")
+    
+    bot.toggle_auto_roulette(req.enabled, req.cooldown)
+    return {
+        "status": "updated",
+        "uin": uin,
+        "auto_roulette": bot.auto_roulette_enabled,
+        "cooldown": bot.auto_roulette_cooldown
+    }
 
 @router.get("/{uin}/profile/{target_uin}", response_model=UserProfile)
 async def get_user_profile(uin: int, target_uin: int, manager: BotManager = Depends(get_bot_manager)):

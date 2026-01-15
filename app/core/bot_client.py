@@ -1,7 +1,8 @@
 import json
 import time
+import asyncio
 import logging
-from typing import List, Set
+from typing import List, Set, Optional
 from pygg import GGClient
 import redis.asyncio as redis
 
@@ -13,6 +14,35 @@ class FastGG(GGClient):
         self.subscribed_events: Set[str] = set(events)
         self.redis = redis_conn
         self.uin = int(uin)
+        self.auto_roulette_enabled = False
+        self.auto_roulette_cooldown = 30
+        self.auto_roulette_task: Optional[asyncio.Task] = None
+
+    async def _auto_roulette_loop(self):
+        logger.info(f"[{self.uin}] Auto roulette loop started (cooldown: {self.auto_roulette_cooldown}s)")
+        try:
+            while self.auto_roulette_enabled and not self.should_disconnect:
+                if self.imtoken:
+                    try:
+                        await self.start_roulette()
+                    except Exception as e:
+                        logger.error(f"[{self.uin}] Auto roulette error: {e}")
+                await asyncio.sleep(self.auto_roulette_cooldown)
+        except asyncio.CancelledError:
+            pass
+        logger.info(f"[{self.uin}] Auto roulette loop stopped")
+
+    def toggle_auto_roulette(self, enabled: bool, cooldown: int = 30):
+        self.auto_roulette_enabled = enabled
+        self.auto_roulette_cooldown = cooldown
+        
+        if enabled:
+            if not self.auto_roulette_task or self.auto_roulette_task.done():
+                self.auto_roulette_task = asyncio.create_task(self._auto_roulette_loop())
+        else:
+            if self.auto_roulette_task:
+                self.auto_roulette_task.cancel()
+                self.auto_roulette_task = None
 
     async def _emit_event(self, event_type: str, payload: dict):
         """Helper to push event to Redis if subscribed."""

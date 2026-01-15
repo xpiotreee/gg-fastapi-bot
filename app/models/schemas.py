@@ -10,10 +10,16 @@ class MessageRequest(BaseModel):
     recipient: int
     content: str
 
+class AutoRouletteRequest(BaseModel):
+    enabled: bool
+    cooldown: int = 30
+
 class BotStatus(BaseModel):
     uin: int
     connected: bool
     events: List[str]
+    auto_roulette: bool = False
+    auto_roulette_cooldown: int = 30
 
 class UserProfile(BaseModel):
     uin: int
