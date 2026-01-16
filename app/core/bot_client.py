@@ -76,6 +76,15 @@ class FastGG(GGClient):
             "packet_timestamp": packet.timestamp
         })
 
+    async def on_file(self, packet, info):
+        logger.info(f"[{self.uin}] File from {packet.sender}: {packet.raw}")
+        await self._emit_event("file", {
+            "sender": packet.sender,
+            "content": packet.raw,
+            "info": info,
+            "packet_timestamp": packet.timestamp
+        })
+
     async def on_roulette_result(self, packet):
         logger.info(f"[{self.uin}] Roulette result: {packet.content}")
         await self._emit_event("roulette", packet.content)
